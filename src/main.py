@@ -1,10 +1,10 @@
-items = [
-    {"name": "Round table", "quantity": 2, "unit": "amount", "unit_price": 2000},
-    {"name": "Wood stool", "quantity": 4, "unit": "amount", "unit_price": 300},
-    {"name": "Wood frame", "quantity": 10, "unit": "amount", "unit_price": 80}
-]
+import csv
+
+items = []
 
 sold_items = list()
+
+file_path = "magazyn.csv"
 
 def get_items():
     print("Name\t\tQuantity\t\tUnit\t\tUnit Price (PLN)")
@@ -51,7 +51,30 @@ def sell_item():
     get_items()
 
 
+def export_items_to_csv():
+    with open(file_path, "w", newline="") as csvfile:
+        fieldnames = ["name", "quantity", "unit", "unit_price"]
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+        for item in items:
+            writer.writerow(item)
+        print("Data saved to file")
+
+
+def load_items_from_csv():
+    with open(file_path, mode='r', newline='') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            items.append(row)
+
+
 def init():
+    try:
+        load_items_from_csv()
+    except FileNotFoundError:
+        print("File not found")
+    except csv.Error:
+        print("Loading file failed. Check files forma")
     message = ""
     while message != "exit":
         message = input("""
@@ -60,6 +83,7 @@ def init():
         show - show the items
         add - add item
         sell - sell item
+        save
         """).lower()
         if message == "show":
             get_items()
@@ -67,6 +91,8 @@ def init():
             add_item()
         elif message == "sell":
             sell_item()
+        elif message == "save":
+            export_items_to_csv()
     exit_program()
 
 init()
