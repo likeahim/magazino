@@ -5,6 +5,7 @@ items = []
 sold_items = list()
 
 file_path = "magazyn.csv"
+file_sold_items = "sold_archive.csv"
 
 def get_items():
     print("Name\t\tQuantity\t\tUnit\t\tUnit Price (PLN)")
@@ -39,12 +40,13 @@ def sell_item():
     name = input("name:\n")
     if any(product["name"] == name for product in items):
         matching_product = next((product for product in items if product["name"] == name), None)
-        quantity = matching_product["quantity"]
+        quantity = int(matching_product["quantity"])
         print(f"You have {quantity} item(s) to sell")
         quantity_to_sell = int(input("quantity:\n"))
         while check_amount(quantity, quantity_to_sell):
             print(f"You have sold {quantity_to_sell} item(s)")
             matching_product["quantity"] = quantity - quantity_to_sell
+            sold_items.append({"name": matching_product["name"], "quantity": quantity_to_sell, "unit": matching_product["unit"], "unit_price": matching_product["unit_price"]})
             break
     else:
         print("There is no such a item")
@@ -58,6 +60,12 @@ def export_items_to_csv():
         writer.writeheader()
         for item in items:
             writer.writerow(item)
+    with open(file_sold_items, "w", newline="") as csvsold:
+        fieldnames = ["name", "quantity", "unit", "unit_price"]
+        writer = csv.DictWriter(csvsold, fieldnames=fieldnames)
+        writer.writeheader()
+        for item in sold_items:
+            writer.writerow(item)
         print("Data saved to file")
 
 
@@ -66,6 +74,10 @@ def load_items_from_csv():
         reader = csv.DictReader(csvfile)
         for row in reader:
             items.append(row)
+    with open(file_sold_items, mode='r', newline='') as soldfile:
+        reader = csv.DictReader(soldfile)
+        for row in reader:
+            sold_items.append(row)
 
 
 def init():
